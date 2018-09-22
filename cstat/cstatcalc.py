@@ -66,7 +66,6 @@ parser = argparse.ArgumentParser(description='This script will read in the desir
                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-s", "--specfilename", help="Name of spectrum", type=str, default='none')
 parser.add_argument("-r", "--rmffilename", help="Name of rmf", type=str, default='none')
-# parser.add_argument("-a", "--arffilename", help="Name of arf", type=str, default='none')
 parser.add_argument("-low", "--lowelim", help="Low energy limit (keV)", type=float, default=0)
 parser.add_argument("-hi", "--highelim", help="High energy limit (keV)", type=float, default=0)
 if len(sys.argv) == 1:
@@ -76,14 +75,12 @@ if len(sys.argv) == 1:
 args = parser.parse_args()
 specname = args.specfilename
 rmfname = args.rmffilename
-# arfname = args.arffilename
 low_e = args.lowelim
 high_e = args.highelim
 
 ### DO THINGS WITH RAW FILES ###############
 # Read in spectrum file
 specfitsfile = fits.open(specname)
-# specfitsfile.info()
 exp = specfitsfile['SPECTRUM'].header['EXPOSURE']
 spec = specfitsfile['SPECTRUM'].data
 specfitsfile.close()
@@ -93,21 +90,11 @@ flag = spec.field('GROUPING')
 
 # Read in rmf
 rmffitsfile = fits.open(rmfname)
-# rmffitsfile.info()
 rmf = rmffitsfile['EBOUNDS'].data
 rmffitsfile.close()
 rmf_chan = rmf.field('CHANNEL')
 emin = rmf.field('E_MIN')
 emax = rmf.field('E_MAX')
-
-# # Read in arf
-# arffitsfile = fits.open(arfname)
-# # arffitsfile.info()
-# arf = arffitsfile[1].data
-# arffitsfile.close()
-# elo = arf.field('ENERG_LO')
-# ehi = arf.field('ENERG_HI')
-# eff = arf.field('SPECRESP')
 
 # Use the group flags to bin up the counts
 bin_counts = np.array([])
@@ -119,7 +106,6 @@ for i in range(0,len(counts)):
     if (flag[i] == 1):
         s += counts[i]
         t += spec_chan[i]
-        # print(spec_chan[i], counts[i])
         while (flag[i+c] == -1):
             s += counts[i+c]
             t += spec_chan[i]
@@ -133,13 +119,10 @@ for i in range(0,len(counts)):
 eavg = np.zeros(len(rmf_chan))
 for i in range(0,len(rmf_chan)):
     eavg[i] = (emax[i]+emin[i])/2
-# coeffs = np.polyfit(rmf_chan,eavg,1)
-# chan2energy = np.poly1d(coeffs)
 coeffs = np.polyfit(eavg,rmf_chan,1)
 energy2chan = np.poly1d(coeffs)
 
 # Compute the corresponding bin limits for desired range
-# bin_energy = chan2energy(bin_chan)
 low_chan = math.floor(energy2chan(low_e))
 high_chan = math.ceil(energy2chan(high_e))
 
@@ -148,33 +131,14 @@ cstat_exp = 0
 cstat_var = 0
 for i in range(0,len(bin_chan)):
     if (bin_chan[i] >= low_chan) and (bin_chan[i] <= high_chan):
-        # print(bin_chan[i],bin_counts[i])
         cstat_exp += exp_cstat(bin_counts[i])
         cstat_var += var_cstat(bin_counts[i])
 ### DO THINGS WITH RAW FILES ###############
 
 
-### DO THINGS WITH XSPEC ##############
-# # Open up the temp.qdp file to obtain count information
-# data = np.genfromtxt('temp.qdp', skip_header=3, comments='NO')
-# counts = np.zeros(len(data))
-#
-# # Call the functions above to compute relevant quantities
-# cstat_exp = 0
-# cstat_var = 0
-# for i in range(0,len(data)):
-#     # counts[i] = data[i,-1]*exp*data[i,0]      # use model spectrum
-#     counts[i] = data[i,2]*exp*data[i,0]       # use observed spectrum
-#     cstat_exp += exp_cstat(counts[i])
-#     cstat_var += var_cstat(counts[i])
-### DO THINGS WITH XSPEC ##############
-
-
 ### FINAL CALCULATIONS AND OUTPUT ###############
 # Compute the desired confidence interval
 conf = np.array([0.683,0.90,0.954,0.997])
-#lowconf = cstat_exp-np.sqrt(2)*erfinv(conf)*np.sqrt(cstat_var)
-#uppconf = cstat_exp+np.sqrt(2)*erfinv(conf)*np.sqrt(cstat_var)
 
 # Report results in terminal
 print('\n****************************************')
