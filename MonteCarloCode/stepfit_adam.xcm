@@ -1,0 +1,102 @@
+### Fit fake spectra with the same model and
+### output results to file 'fit_results.dat'
+
+### Parameters:
+set xs_echo_script 0    ;#  make XSPEC not echo the commands that are input
+set nf 100                ;#  nf   = number of simulations
+set Emin 0.3            ;#  Emin = minimum energy to fit
+set Emax 10.0           ;#  Emax = maximum energy to fit
+set redshift 0.0809  ;#  redshift = z of the source
+
+#set model zxipcfXpo+xillver+relxill_03-10.xcm
+set model zxipcfXpo+xillver+relxill_03-10_fakfit.xcm
+
+
+### Initialize xspec
+query no
+method leven
+statistic cstat
+chatter 1
+
+### Create a file which will contain the results
+#set fileout [open real_result.dat w]
+set fileout [open fake_result$nf.dat w]
+
+### Read in energy file
+set filein [open "~/Dropbox/Graduate/PhD/MonteCarloCode/energies.dat" r]
+set file_data [read $filein]
+close $filein
+set energylist [split $file_data "\n"]
+
+
+### Loop through all data
+for {set i 1} {$i <= $nf} {incr i} {
+
+    ### Read in data
+    cd fakes/
+    data fakespec${i}_grp.fak
+    cd ../
+    #data PG1211143_opt.pha
+
+    ### Ignore energies
+    ign **-$Emin
+    ign $Emax-**
+    ign bad
+
+    ### Read in the base model
+    @$model
+
+    ### Checks for degrees of freedom
+    tclout dof
+    set tdof [lindex $xspec_tclout 0]
+    if {$tdof < 4} {
+        puts "** Not enough degrees of freedom"
+        continue
+    }
+
+    puts "\nIteration: $i"
+
+    ### Cycle through the line energies given above
+    foreach line $energylist {
+        puts "      Line energy: $line"
+        @$model
+        newpar 28,45
+        fit 100 0.01
+
+        ### Get the fit statistic and degrees of freedom
+        tclout stat
+        set base_cstat $xspec_tclout
+        tclout dof
+        set base_dof [lindex $xspec_tclout 0]
+
+        set NRG $line
+        ### Add in a zgauss component
+        addcom 3 zgauss & /*
+        newpar 6, $NRG, -1, 0.3,0.3, 10,10
+        newpar 7, 0.1, -1, 0.01,0.01, 1,1
+        newpar 8, $redshift, -1, 0,0, 1,1
+        newpar 9, 0.0, 0.01, -1e-4,-1e-4, 1e-4,1e-4
+
+        ### Fit this new model with added gaussian
+        fit 100 0.01
+
+        ### Get the fit statistic, degrees of freedom, and normalization of line
+        tclout stat
+        set mod_cstat $xspec_tclout
+        tclout dof
+        set mod_dof [lindex $xspec_tclout 0]
+        tclout param 9
+        set norm [lindex $xspec_tclout 0]
+
+        ### Put the chi-square and degrees of freedom of each fit into # file
+        puts $fileout "$i $NRG $norm $mod_cstat $mod_dof $base_cstat $base_dof"
+        delcom 2
+    }
+
+    ### Reset everything
+    data none
+    mo none
+}
+
+close $fileout
+exit
