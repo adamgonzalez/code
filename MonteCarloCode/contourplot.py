@@ -17,9 +17,9 @@ rcParams['xtick.major.size'] = '7'
 rcParams['ytick.major.size'] = '7'
 rcParams['xtick.minor.size'] = '4'
 rcParams['ytick.minor.size'] = '4'
-# rcParams['axes.facecolor'] = 'k'
-rcParams['font.family'] = 'serif'
-rcParams['text.usetex'] = True
+#rcParams['axes.facecolor'] = 'k'
+#rcParams['font.family'] = 'serif'
+#rcParams['text.usetex'] = True
 
 ### Source Redshift
 # srcname = 'Mrk279' ; srcz = 0.0304051
@@ -27,8 +27,8 @@ rcParams['text.usetex'] = True
 # srcname = 'Mrk79' ; srcz = 0.022189
 # srcname = 'Mrk841' ; srcz = 0.0336422
 
-# srcname = 'IZw1' ; srcz = 0.0589
-srcname = 'Mrk335' ; srcz = 0.025785
+srcname = 'IZw1' ; srcz = 0.0589
+#srcname = 'Mrk335' ; srcz = 0.025785
 
 Nthreads = 46
 
@@ -37,7 +37,7 @@ Nthreads = 46
 ### Read in the fake spectra results
 fake_data = np.zeros((0,7))
 for i in range(0, Nthreads):
-    tmp = np.genfromtxt("results/hi/fake_10eVresult_T{0:1d}.dat".format(i))
+    tmp = np.genfromtxt("results/EPIC/mos2/fake_10eVresult_T{0:1d}.dat".format(i))
     fake_data = np.concatenate((fake_data,tmp), axis=0)
 
 ### Break down the data into named arrays
@@ -61,7 +61,7 @@ Nsamples = 62
 real_data = np.zeros((0,Nsamples+2))
 
 for i in range(0, Nthreads):
-    rfname = "results/hi/real_otherfrozen_10eVresult_T{0:1d}.dat".format(i)
+    rfname = "results/EPIC/mos2/real_10eVresult_T{0:1d}.dat".format(i)
     if (os.stat(rfname).st_size < 1):
         print("Ignoring T{0:1d} as file is empty!".format(i))
         continue
@@ -109,7 +109,7 @@ for i in range(0, len(normE)):
 
 
 ######### RESIDUALS #############################
-residuals = np.genfromtxt('../residuals_1-10_hi.qdp', skip_header=3)
+residuals = np.genfromtxt('results/EPIC/mos2/residuals_04-10.qdp', skip_header=3)
 energy = residuals[:,0]
 energy_err = residuals[:,1]
 ratio = residuals[:,2]
@@ -131,20 +131,20 @@ fig, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=False)
 
 ### Plot the residuals first
 ax1.axhline(1, color='k', dashes=[5,3], lw=1, zorder=0)
-for i in range(0,len(abs_energy)):
-    ax1.axvline(abs_energy[i]/(1+srcz), color='0.6', dashes=[4,2], lw=1, zorder=i+1)
-ax1.text(abs_energy[2]/(1+srcz)-0.16, 0.35, abs_name[2], rotation='vertical', color='k', fontsize=8)
-ax1.text(abs_energy[7]/(1+srcz)-0.16, 0.35, abs_name[7], rotation='vertical', color='k', fontsize=8)
-ax1.text(abs_energy[8]/(1+srcz)-0.16, 0.35, abs_name[8], rotation='vertical', color='k', fontsize=8)
-ax1.text(abs_energy[10]/(1+srcz)-0.16, 0.35, abs_name[10], rotation='vertical', color='k', fontsize=8)
-ax1.text(abs_energy[11]/(1+srcz)-0.16, 0.35, abs_name[11], rotation='vertical', color='k', fontsize=8)
+#for i in range(0,len(abs_energy)):
+#    ax1.axvline(abs_energy[i]/(1+srcz), color='0.6', dashes=[4,2], lw=1, zorder=i+1)
+#ax1.text(abs_energy[2]/(1+srcz)-0.16, 0.35, abs_name[2], rotation='vertical', color='k', fontsize=8)
+#ax1.text(abs_energy[7]/(1+srcz)-0.16, 0.35, abs_name[7], rotation='vertical', color='k', fontsize=8)
+#ax1.text(abs_energy[8]/(1+srcz)-0.16, 0.35, abs_name[8], rotation='vertical', color='k', fontsize=8)
+#ax1.text(abs_energy[10]/(1+srcz)-0.16, 0.35, abs_name[10], rotation='vertical', color='k', fontsize=8)
+#ax1.text(abs_energy[11]/(1+srcz)-0.16, 0.35, abs_name[11], rotation='vertical', color='k', fontsize=8)
 ax1.axvline(6.4/(1+srcz), color='k', dashes=[5,3], lw=1, zorder=99)
 ax1.minorticks_on()
-ax1.errorbar(energy, ratio, xerr=energy_err, yerr=ratio_err, fmt='+', ms=1, color='r', ecolor='r', lw=1, alpha=1.0, zorder=100)  ### royalblue
+ax1.errorbar(energy, ratio, xerr=energy_err, yerr=ratio_err, fmt='+', ms=1, color='royalblue', ecolor='royalblue', lw=1, alpha=1.0, zorder=100)  ### royalblue
 ax1.set_ylabel('Data / Model')
 # ax1.set_ylim(min(ratio)-0.125*min(ratio), max(ratio)+0.125*max(ratio))
 # ax1.set_ylim(min(ratio)-max(ratio_err), max(ratio)+max(ratio_err))
-ax1.set_ylim(-0.1,1.8)
+ax1.set_ylim(0.5,1.5)
 ax1.set_xlim(min(normE),max(normE))
 # ax1.set_title(srcname)
 fig.subplots_adjust(hspace=0)
@@ -170,13 +170,13 @@ X,Y = np.meshgrid(normE,normN*10**5)
 #             plt.scatter(normE[i]/(1+srcz), normN[j]*10**5, s=5, c=pc)
 
 ax2.axhline(0.0, color='k', dashes=[5,3], lw=1, zorder=0)
-for i in range(0,len(abs_energy)):
-    ax2.axvline(abs_energy[i]/(1+srcz), color='0.6', dashes=[4,2], lw=1, zorder=i)
+#for i in range(0,len(abs_energy)):
+#    ax2.axvline(abs_energy[i]/(1+srcz), color='0.6', dashes=[4,2], lw=1, zorder=i)
 ax2.axvline(6.4/(1+srcz), color='k', dashes=[5,3], lw=1, zorder=99)
 ax2.minorticks_on()
 
-# c = ax2.contourf(X,Y,normsiggrid.T, colors=['#DCEDC8','#42B3D5','#1A237E'], levels=[0.6827,0.9545,0.9973,1.0], alpha=0.9, zorder=0)  # ocean 0.19
-c = ax2.contourf(X,Y,normsiggrid.T, colors=['#FEEB65','#E4521B','#4D342F'], levels=[0.6827,0.9545,0.9973,1.0], alpha=0.9, zorder=0)  # fall
+c = ax2.contourf(X,Y,normsiggrid.T, colors=['#DCEDC8','#42B3D5','#1A237E'], levels=[0.6827,0.9545,0.9973,1.0], alpha=0.9, zorder=0)  # ocean 0.19
+#c = ax2.contourf(X,Y,normsiggrid.T, colors=['#FEEB65','#E4521B','#4D342F'], levels=[0.6827,0.9545,0.9973,1.0], alpha=0.9, zorder=0)  # fall
 # # ax2.contourf(X,Y,normsiggrid.T, colors=['#FFECB3','#E85285','#6A1B9A'], levels=[0.6827,0.9545,0.9973,1.0], alpha=0.9)
 # # ax2.scatter(X,Y, c=normsiggrid.T, s=10, marker='s', cmap='binary', norm=colors.LogNorm(vmin=0.1,vmax=1.0))
 # # ax2.contourf(X,Y,normsiggrid.T, cmap='viridis_r', norm=colors.LogNorm(vmin=0.6827, vmax=1.0), levels=[0.6827,0.9545,0.9973,1.0], alpha=0.9)
@@ -186,9 +186,9 @@ c = ax2.contourf(X,Y,normsiggrid.T, colors=['#FEEB65','#E4521B','#4D342F'], leve
 ax2.set_xlabel('Observed Energy [keV]')
 ax2.set_ylabel('Line Normalisation\n[$\\times 10^{-5}$ photons cm$^{-2}$ s$^{-1}$]')
 ax2.set_xlim(min(normE),max(normE))
-ax2.set_ylim(bottom=-0.99, top=0.99)
+ax2.set_ylim(bottom=-1.24, top=1.24)
 
-plt.savefig("{0:s}_1-10_contours_10eV_hi_otherfrozen.png".format(srcname), bbox_inches='tight', dpi=600)
+plt.savefig("{0:s}_1-10_contours_10eV_EPIC_mos2.png".format(srcname), bbox_inches='tight', dpi=600)
 # plt.show()
 ######### PLOT ##################################
 
