@@ -1,9 +1,9 @@
 #!/bin/bash
 
-model=EPIC_mos2_fakfit.xcm
-# background=PN_IZW1_C_bg.pha
+model=EPIC_mos2_cflux-flux-sep_fakfit.xcm
+#background=PN_IZW1_C_bg.pha
 rmf=mos2.rsp
-# arf=PN_IZW1.arf
+#arf=PN_IZW1.arf
 
 for i in {1..1000}
 do
@@ -25,12 +25,5 @@ fakespec${i}.fak
 262588.0
 exit
 EOF
-# ftgrouppha outfile=fakespec${i}_grp.fak infile=fakespec${i}.fak backfile=fakespec${i}_bkg.fak grouptype=opt respfile=${rmf}
 ftgrouppha outfile=fakespec${i}_grp.fak infile=fakespec${i}.fak grouptype=opt respfile=${rmf}
-# grppha <<EOF
-# fakespec${i}.fak
-# fakespec${i}_grp.fak
-# group min 20
-# exit
-# EOF
 done
