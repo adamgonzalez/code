@@ -6,20 +6,33 @@ Descr.: Use result from Gonzalez+2017 to determine coronal parameters.
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
-from scipy.stats import gaussian_kde
-import random
 import time
 import os
+from matplotlib import rcParams
+rcParams['xtick.top'] = 'True'
+rcParams['ytick.right'] = 'True'
+rcParams['xtick.direction'] = 'in'#'inout'
+rcParams['ytick.direction'] = 'in'#'inout'
+rcParams['xtick.major.size'] = 3.5#7
+rcParams['xtick.major.width'] = 1.2
+rcParams['ytick.major.size'] = 3.5#7
+rcParams['ytick.major.width'] = 1.2
+rcParams['xtick.minor.size'] = 2#4
+rcParams['ytick.minor.size'] = 2#4
+rcParams['axes.linewidth'] = 1.5
+rcParams['font.family'] = 'serif'
+rcParams['text.usetex'] = True
+rcParams['text.latex.preamble'] = ['\\boldmath']
 
-matplotlib.rcParams.update({'font.size': 18})
-matplotlib.rcParams['axes.linewidth'] = 1 #set the value globally
-plt.rc('font',family='serif')
-plt.rc('text',usetex=True)
+#matplotlib.rcParams.update({'font.size': 18})
+#matplotlib.rcParams['axes.linewidth'] = 1 #set the value globally
+#plt.rc('font',family='serif')
+#plt.rc('text',usetex=True)
 
 ####################################################################################################
 # Compute the approximation for R given z and beta
 def R_calc(h,v):
-    a = 0.998
+    a = 0.986
 
     mu_in = (2.0 - h**2.0)/(h**2.0 + a**2.0)
     mu_out = (2.0*h)/(h**2.0 + a**2.0)
@@ -31,30 +44,18 @@ def R_calc(h,v):
     return value
 ####################################################################################################
 
-os.chdir("/Users/agonzalez/Documents/Research/Data/IZw1")
+os.chdir("/Users/agonzalez/Documents/Research/Data/Mrk335/lowhi")
 
-# resh, resv = 8400, 150
-# resh, resv = 1000, 1000
-minh, maxh = 2.0, 50.0
+minh, maxh = 1.0, 10.0
 minv, maxv = 0.0, 1.0
 
 for k in range (0, 1):
     RUN = k+1
     print "RUN: ", RUN
 
-    # print "Setting up the randoms..."
-    # t0 = time.time()
-    # z, beta = np.zeros(resh), np.zeros(resv)
-    # for i in range (0,resh):
-    #     z[i] = random.uniform(minh,maxh)
-    # for i in range (0, resv):
-    #     beta[i] = random.uniform(minv,maxv)
-    # t1 = time.time()
-    # print t1-t0, "\n"
-
     print "Setting up the uniform grid..."
     t0 = time.time()
-    z = np.linspace(minh, maxh, num=(maxh-minh)/1e-1)
+    z = np.linspace(minh, maxh, num=(maxh-minh)/9e-3)
     beta = np.linspace(minv, maxv, num=(maxv-minv)/1e-3)
     t1 = time.time()
     print t1-t0, "\n"
@@ -91,19 +92,19 @@ for k in range (0, 1):
     # ax = plt.subplot(111)
     col = ['k','k','k']
 
-    res = 50
+    res = 100 
     Vesc = np.zeros([5,res])
     R = np.zeros([5,res])
 
     for j in range (0,3):
         ### I Zw 1
-        if (j==0):
-            M_bh = pow(10.0, 7.30)*M_sun ; name = 'Negrete et al. (2012)'
-            r_g0 = (G*M_bh)/(c**2.0)
-        if (j==1):
-            M_bh = pow(10.0, 7.30+0.23)*M_sun ; name = 'Mass + error'
-        if (j==2):
-            M_bh = pow(10.0, 7.30-0.19)*M_sun ; name = 'Mass -- error'
+        #if (j==0):
+        #    M_bh = pow(10.0, 7.30)*M_sun ; name = 'Negrete et al. (2012)'
+        #    r_g0 = (G*M_bh)/(c**2.0)
+        #if (j==1):
+        #    M_bh = pow(10.0, 7.30+0.23)*M_sun ; name = 'Mass + error'
+        #if (j==2):
+        #    M_bh = pow(10.0, 7.30-0.19)*M_sun ; name = 'Mass -- error'
 
         ### III Zw 2
         # if (j==0):
@@ -114,6 +115,14 @@ for k in range (0, 1):
         # if (j==2):
         #     M_bh = (184000000.-27000000.)*M_sun ; name = '--'
 
+        ### Mrk 335
+        if (j==0):
+            M_bh = (2.5e7)*M_sun ; name = 'Grier et al. (2012)'
+            r_g0 = (G*M_bh)/(c**2.0)
+        if (j==1):
+            M_bh = (2.5e7 + 3e6)*M_sun ; name = 'Mass + error'
+        if (j==2):
+            M_bh = (2.5e7 - 3e6)*M_sun ; name = 'Mass -- error'
 
         R_s = (2.0*G*M_bh)/(c**2.0)
         r_g = (G*M_bh)/(c**2.0)
@@ -145,11 +154,11 @@ for k in range (0, 1):
     # Compute and plot the pairs (z,b) that match the reflection fraction desired
     c = 0
     pairs = [[0,0,0]]
-    minR, maxR = 0.54-0.04, 0.54+0.04       ### IZw1
+    # minR, maxR = 0.54-0.04, 0.54+0.04       ### IZw1
     # minR, maxR = 0.204-0.033, 0.204+0.017   ### IIIZw2
-    ## minR, maxR = 0.2-0.05, 0.2+0.05           ### test
     # minR, maxR = 0.23-0.03, 0.23+0.02   ### IIIZw2 XMM
     # minR, maxR = 0.12-0.02, 0.12+0.01   ### IIIZw2 Suzaku
+    minR, maxR = 3.2-0.6, 3.2+0.6 	### Mrk 335
     print "Finding the pairs..."
     t0 = time.time()
     for i in range (0, resh):
@@ -163,24 +172,13 @@ for k in range (0, 1):
     print 'Number of sources within R = ', minR, ' to ', maxR, ' is ', c
     print ''
 
-    # avg_z, stde_z = np.average(pairs[1:,0]), np.std(pairs[1:,0])
-    # avg_b, stde_b = np.average(pairs[1:,1]), np.std(pairs[1:,1])
-    # print 'Average height:   z = ', avg_z, ' +/- ', stde_z
-    # print 'Average velocity: b = ', avg_b, ' +/- ', stde_b
-    # print ''
-
-    # # SAVE THE OUTPUT
-    # f = open("xmm_{0:01d}.txt".format(int(RUN)),"w")
-    # np.savetxt(f, pairs[1:,:])
-
     cfset = plt.scatter(pairs[1:,0], pairs[1:,1], c=pairs[1:,2], s=5.0, cmap='coolwarm', vmin=minR, vmax=maxR, alpha=1.0)
     cbar = plt.colorbar(cfset, pad=0.05)#, ticks=[-0.02, 0.0, 0.02, 0.04, 0.06, 0.08, 0.10])
-    cbar.ax.set_ylabel('Reflection Fraction', rotation='270', labelpad=25.0)
-    # plt.errorbar(avg_z, avg_b, xerr=stde_z, yerr=stde_b, color='k', ecolor='k', linewidth=1.0)
-    plt.xlabel(r'Source Height /$r_g$')
-    plt.ylabel(r'Source Velocity /$c$')
+    cbar.ax.set_ylabel('\\textbf{Reflection Fraction, $R$}', rotation='270', labelpad=15.0)
+    plt.xlabel('\\textbf{Source Height} $[r_g]$')
+    plt.ylabel('\\textbf{Source Velocity} $[c]$')
     plt.xlim(minh,maxh)
     plt.ylim(minv,maxv)
 
-    plt.savefig('IZw1_RZB.png', bbox_inches='tight', dpi=600)
+    plt.savefig('Mrk335_RZB.png', bbox_inches='tight', dpi=600)
     # plt.show()
